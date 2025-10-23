@@ -1,0 +1,264 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -448,
+        -144
+      ],
+      "id": "43ed5fd7-733a-4cd2-b641-6e70da027f4e",
+      "name": "When chat message received",
+      "webhookId": "5b0c45ad-fb25-4637-a2ae-cb7c4c6ac37b"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "System Message\nYou are a research agent that helps find contact information from Google Maps or websites.\nAfter searching, save your results to Google Sheets.\nWhen doing this, you must use this JSON format in a single call:\n[\n{\n  \"Name\": \"Company name\",\n  \"Address\": \"Company address\",\n  \"Number\": \"Company phone number\",\n  \"Website\": \"Company website\",\n  \"Rating\": \"Company rating\",\n  \"Opening Hours\": \"Company opening hours\",\n  \"Email\": \"Company email address\"\n},\n...\n]\nWhen sending the number to \"Add to Google Sheets\", remove the + at the beginning of each number.\nWhen going through multiple pages, call \"Add to Google Sheets\" after each \"Map Search\"\nWhen going through multiple pages, call \"Add to Google Sheets\" after each \"Map Search\" call to save the data directly, without consolidating it.\nIf no email is found, pass it as N/A to \"Add to Google Sheets\".\nKeep searching in Map Search until you find no more pages or results."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -208,
+        -144
+      ],
+      "id": "7895aac6-071d-494c-a0a2-e3645c5d95b1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -352,
+        64
+      ],
+      "id": "3c08fdd1-7ee4-4488-b722-5df6f8ffc70b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "lXaM6P6wG8sJWy6e",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        64
+      ],
+      "id": "f0bddcad-eb53-44e5-aae2-7e0cab8c29ea",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "toolDescription": "This bot helps you extract all contact information for lead generation from Google Maps.\nInput parameters:\n\n\"q\" for the search term (e.g., \"Dental Clinic Amsterdam\").\n\"ll\" for geographic coordinates.\n\"page\" for the current search results page.",
+        "url": "https://google.serper.dev/maps",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "ll",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', ``, 'string') }}"
+            },
+            {
+              "name": "hl",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', ``, 'string') }}"
+            },
+            {
+              "name": "page",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters3_Value', ``, 'string') }}"
+            },
+            {
+              "name": "location",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters4_Value', ``, 'string') }}"
+            },
+            {
+              "name": "gl",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters5_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "1bdc0aa69570a46f15c44f1501e611f719208474"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        176,
+        48
+      ],
+      "id": "c736b77b-d5ee-4def-bb45-4cb9e3196608",
+      "name": "Map Search Tool"
+    },
+    {
+      "parameters": {
+        "description": "This is a tool to analyze the input and store it in Google Sheets columns, including:\n{\n  \"Name\": xxx,\n  \"Address\": xxx,\n  \"Number\": xxx,\n  \"Website\": xxx,\n  \"Rating\": xxx,\n  \"Opening Hours\": xxx,\n  \"Email\": xxx\n}",
+        "workflowId": {
+          "__rl": true,
+          "value": "aOAIUtKVZxhlPa8Z",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/aOAIUtKVZxhlPa8Z",
+          "cachedResultName": "2.otomasyon"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "aNumber": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('aNumber', ``, 'number') }}",
+            "aField": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('aField', ``, 'string') }}",
+            "thisFieldAcceptsAnyType": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('thisFieldAcceptsAnyType', ``, 'string') }}",
+            "anArray": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('anArray', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "aField",
+              "displayName": "aField",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "aNumber",
+              "displayName": "aNumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "thisFieldAcceptsAnyType",
+              "displayName": "thisFieldAcceptsAnyType",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "anArray",
+              "displayName": "anArray",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        64
+      ],
+      "id": "7daf7b7b-fe7c-4ea3-a6e9-947103724bba",
+      "name": "2.otomasyon"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Search Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2.otomasyon": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "55f8a70d-9349-4b26-a194-849d939a73fc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "467867e6a5b731c55556fd03afca2b634394ef42efad41ae486024e8a806f3fa"
+  },
+  "id": "uC8KfmlkPsyPHwfC",
+  "tags": []
+}

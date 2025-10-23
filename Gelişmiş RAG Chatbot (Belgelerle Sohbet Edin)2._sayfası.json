@@ -1,0 +1,133 @@
+{
+  "name": "2.otomasyon",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "jsonExample"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        -80
+      ],
+      "id": "b6ca0f58-5d41-4969-a75e-6ff9e3e6ddf7",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// UUID v7 fonksiyonu\nconst v7 = () => {\n  return 'tttttttt-tttt-7xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c){\n    const r = Math.trunc(Math.random() * 16);\n    const v = c == 'x' ? r : (r & 0x3 | 0x8);\n    return v.toString(16);\n  }).replace(/[t]{8}-[t]{4}/, function (){\n    const unixtimestamp = Date.now().toString(16).padStart(12, '0');\n    return unixtimestamp.slice(0, 8) + '-' + unixtimestamp.slice(8);\n  });\n}\n\n// Ana workflow'dan gelen veriyi al\nconst inputDataRaw = $input.all();\nif (!inputDataRaw || !inputDataRaw.length) {\n  return []; // input boşsa boş array dön\n}\n\nconst inputData = inputDataRaw[0].json;\n\n// Eğer data bir array değilse array yap\nlet data;\nif (Array.isArray(inputData)) {\n  data = inputData;\n} else if (inputData.query) {\n  try {\n    data = JSON.parse(inputData.query);\n    if (!Array.isArray(data)) data = [data]; // parse sonrası array değilse array yap\n  } catch (e) {\n    data = []; // parse hatalıysa boş array\n  }\n} else if (typeof inputData === 'object' && inputData !== null) {\n  data = [inputData]; // tek obje ise array'e çevir\n} else {\n  data = []; // diğer durumlarda boş array\n}\n\n// Her item'a UUID ekle ve güvenli şekilde alanları doldur\nconst dataWithId = data.map(i => {\n  i = i || {}; // undefined ise boş obje\n  const uuid = v7();\n  return { \n    UUID: uuid, \n    Name: i.Name || i.name || '',\n    Address: i.Address || i.address || '',\n    Number: i.Number || i.number || '',\n    Website: i.Website || i.website || '',\n    Rating: i.Rating || i.rating || '',\n    \"Opening Hours\": i[\"Opening Hours\"] || i.opening_hours || '',\n    Email: i.Email || i.email || 'N/A'\n  };\n});\n\nreturn dataWithId;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        -80
+      ],
+      "id": "964f5b59-a6cc-4eb6-99f8-2abe9e46df16",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1u0Rq0AAQdfhD-WoM95qi_eXIT3uIL2xDcq8cWmsFlKs",
+          "mode": "list",
+          "cachedResultName": "Maps",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u0Rq0AAQdfhD-WoM95qi_eXIT3uIL2xDcq8cWmsFlKs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sayfa1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1u0Rq0AAQdfhD-WoM95qi_eXIT3uIL2xDcq8cWmsFlKs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        112,
+        -80
+      ],
+      "id": "d8f2d51e-ed9c-48c2-a1ae-fd791d86159d",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "J0GyZC84I6OnGVOV",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return {json: {response: \"ok\"}}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        -80
+      ],
+      "id": "8fdbc414-ac91-44a9-a0d5-82ce7ad188c3",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "42a3e670-dfc6-4c3c-bb0c-65925fbc702b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "467867e6a5b731c55556fd03afca2b634394ef42efad41ae486024e8a806f3fa"
+  },
+  "id": "aOAIUtKVZxhlPa8Z",
+  "tags": []
+}

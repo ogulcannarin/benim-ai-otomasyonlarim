@@ -1,0 +1,411 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -64
+      ],
+      "id": "42726d9f-a1b3-4f4b-add3-0d75c8a14615",
+      "name": "When clicking ‘Execute workflow’",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1ZD1qguma_5P6VjeBSY9m-SIQIZeMLuEU",
+          "mode": "list",
+          "cachedResultName": "KATI BASINCI VIP FİZİK PDF.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1ZD1qguma_5P6VjeBSY9m-SIQIZeMLuEU/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -560,
+        -64
+      ],
+      "id": "7fca7866-aa26-46ef-bebd-d3c475b727ab",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wvs1X7VLSGEGPae6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -64
+      ],
+      "id": "ffbdaa38-56f4-4c9c-a1de-6b9849b2dd5b",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputText = Simple.first().json.text;\n\n// Cümleleri ayırmak için düzenli ifade (regex)\nconst sentenceRegex = /([.!?])\\s+(?=[A-Z])/;\nconst sentences = inputText\n    .split(sentenceRegex)\n    .map(s => s.trim())\n    .filter(s => s.length > 0);\n\n// Chunk'ları oluşturma\nconst outputChunks = [];\nlet currentChunk = \"\";\nlet sentenceCount = 0;\nconst maxSentences = 3;\nconst maxLength = 500;\n\nfor (let sentence of sentences) {\n    const nextChunk = currentChunk ? `${currentChunk} ${sentence}` : sentence;\n    \n    if (sentenceCount < maxSentences && nextChunk.length <= maxLength) {\n        currentChunk = nextChunk;\n        sentenceCount += 1;\n    } else {\n        if (currentChunk) {\n            outputChunks.push(currentChunk.trim());\n        }\n        currentChunk = sentence;\n        sentenceCount = 1;\n    }\n}\n\nif (currentChunk) {\n    outputChunks.push(currentChunk.trim());\n}\n\n// Return output\nconst outputItems = outputChunks.map((chunk, index) => ({\n    json: {\n        fullText: chunk,\n        index: index\n    }\n}));\n\nreturn outputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        -64
+      ],
+      "id": "2a1ea054-f8d0-4a4d-a530-5c15386afc20",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        -64
+      ],
+      "id": "3e1197df-af40-4e90-bfcc-201faac36418",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "kgOKCn0Wjx2Rt8S9",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Dosya Yukleme \n",
+        "height": 256,
+        "width": 1200
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -144
+      ],
+      "id": "61ef07d0-aa0e-421a-8d37-2aea9df3946e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Yapay zeka ajanı\n",
+        "height": 256,
+        "width": 1200
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -432
+      ],
+      "id": "6defe7c6-48e1-4f8e-9925-69bf07b6e09b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -784,
+        -368
+      ],
+      "id": "62268b8a-6285-4323-a064-2fac4665247f",
+      "name": "When chat message received",
+      "webhookId": "45f788a4-0380-4a8d-9323-2d9269fa7c89"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Overview\nSen, CoreMagnetB2B hakkında derin bilgiye sahip bir yapay zekâ asistanısın. Görevin, insanlardan gelen soruları doğru, açık ve tutarlı şekilde yanıtlamaktır.\n\nBunun için \"Supabase Vector Store\" adlı aracını kullanarak CoreMagnetB2B ile ilgili bilgi tabanından içerik getirmen gerekir. Cevaplarını oluştururken mutlaka önce veri tabanından içerik ara, ardından bu içeriklere dayalı şekilde yanıt ver.\n\nCoreMagnetB2B; üreticiler, ihracatçılar ve B2B firmalar için geliştirilmiş bir yapay zekâ destekli satış platformudur. Özellikleri, kullanım alanları, altyapısı, süreçleri ve başarı hikâyeleri gibi tüm konularda bilgi verebilirsin.\n\nEğer emin olmadığın bir konu varsa, yalnızca elindeki bilgiye dayalı olarak cevap ver veya \"bu konuda yeterli veri bulamadım\" de."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -576,
+        -384
+      ],
+      "id": "5b4e7d30-5873-4170-8180-a7ad023c4005",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -640,
+        -240
+      ],
+      "id": "1c396762-a142-49b4-a280-06577f161bae",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "l30YXp7ggTXQwCnJ",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "use this tool to search the database",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "useReranker": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        -384
+      ],
+      "id": "17731ff1-b917-4e39-a119-1f55ada7304e",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "kgOKCn0Wjx2Rt8S9",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -64,
+        80
+      ],
+      "id": "2982a4c4-ab45-419c-8d9c-fdaf2cf94d97",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "lXaM6P6wG8sJWy6e",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        112
+      ],
+      "id": "29c0c900-2aab-42d3-ae61-2d6bf3366978",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -176
+      ],
+      "id": "f68bd70e-b5f9-46e9-873d-f14a2e968f9e",
+      "name": "Reranker Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "qudMcgoF4bkt7B71",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        -224
+      ],
+      "id": "11e21dca-f430-49f1-98c7-be0819e3aa76",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "l30YXp7ggTXQwCnJ",
+          "name": "OpenAi account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reranker Cohere": {
+      "ai_reranker": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_reranker",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c2530075-68ab-4000-83d8-ff1fc8cb1104",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "467867e6a5b731c55556fd03afca2b634394ef42efad41ae486024e8a806f3fa"
+  },
+  "id": "ygqJiQ2yVjrEYdJA",
+  "tags": []
+}
